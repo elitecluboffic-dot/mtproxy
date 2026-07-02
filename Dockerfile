@@ -1,12 +1,13 @@
-FROM alpine:3.18
+FROM ubuntu:22.04
 
-RUN apk add --no-cache \
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
     git \
-    build-base \
-    openssl-dev \
-    linux-headers \
+    build-essential \
+    libssl-dev \
     curl \
-    bash
+    && rm -rf /var/lib/apt/lists/*
 
 RUN git clone https://github.com/TelegramMessenger/MTProxy.git /opt/MTProxy \
     && cd /opt/MTProxy \
@@ -14,7 +15,6 @@ RUN git clone https://github.com/TelegramMessenger/MTProxy.git /opt/MTProxy \
 
 WORKDIR /opt/MTProxy
 
-# Download config Telegram terbaru waktu build
 RUN curl -s https://core.telegram.org/getProxyConfig -o proxy-multi.conf \
     && curl -s https://core.telegram.org/getProxySecret -o proxy-secret
 
