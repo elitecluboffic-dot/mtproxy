@@ -1,0 +1,16 @@
+# Build artifacts
+*.o
+*.a
+objs/
+
+# Config files yang auto-download saat runtime
+proxy-secret
+proxy-multi.conf
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
