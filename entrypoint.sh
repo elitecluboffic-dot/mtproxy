@@ -3,15 +3,12 @@ set -e
 
 WORKDIR=/opt/MTProxy
 
-# ── Refresh config Telegram setiap start ──
 echo "[MTProxy] Downloading latest Telegram proxy config..."
 curl -s https://core.telegram.org/getProxyConfig -o "$WORKDIR/proxy-multi.conf" || true
 curl -s https://core.telegram.org/getProxySecret  -o "$WORKDIR/proxy-secret"     || true
 
-# ── Validasi environment variables ──
 if [ -z "$SECRET" ]; then
     echo "[MTProxy] ERROR: Environment variable SECRET belum di-set!"
-    echo "[MTProxy] Jalankan dengan: -e SECRET=yoursecrethere"
     exit 1
 fi
 
@@ -32,6 +29,5 @@ exec ./objs/bin/mtproto-proxy \
     -p 8888 \
     -H "$PORT" \
     -S "$SECRET" \
-    --aes-pwd proxy-secret proxy-multi.conf \
     -M "$WORKERS" \
-    "${EXTRA_ARGS:-}"
+    --aes-pwd proxy-secret proxy-multi.conf
