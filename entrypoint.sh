@@ -14,12 +14,12 @@ fi
 
 PORT="${PORT:-443}"
 WORKERS="${WORKERS:-2}"
+AD_TAG="${AD_TAG:-}"
 
 # Ambil IP internal container (buat nat-info)
 LOCAL_IP=$(hostname -I | awk '{print $1}')
 
 # Ambil IP publik Railway via metadata atau env
-# Kalau RAILWAY_PUBLIC_DOMAIN ada, resolve IP-nya
 if [ -n "$RAILWAY_PUBLIC_DOMAIN" ]; then
     PUBLIC_IP=$(getent hosts "$RAILWAY_PUBLIC_DOMAIN" | awk '{print $1}' | head -1)
 else
@@ -31,11 +31,22 @@ echo "[MTProxy] Starting MTProxy..."
 echo "[MTProxy] Port      : $PORT"
 echo "[MTProxy] Workers   : $WORKERS"
 echo "[MTProxy] Secret    : $SECRET"
+if [ -n "$AD_TAG" ]; then
+    echo "[MTProxy] Ad Tag    : $AD_TAG"
+else
+    echo "[MTProxy] Ad Tag    : (tidak di-set, sponsored channel TIDAK akan muncul)"
+fi
 echo "[MTProxy] Local IP  : $LOCAL_IP"
 echo "[MTProxy] Public IP : $PUBLIC_IP"
 echo "[MTProxy] ============================================"
 
 cd "$WORKDIR"
+
+# Siapkan flag ad tag, kosong kalau AD_TAG belum di-set
+ADTAG_FLAG=()
+if [ -n "$AD_TAG" ]; then
+    ADTAG_FLAG=(-P "$AD_TAG")
+fi
 
 if [ -n "$PUBLIC_IP" ] && [ -n "$LOCAL_IP" ] && [ "$PUBLIC_IP" != "$LOCAL_IP" ]; then
     echo "[MTProxy] Using NAT: $LOCAL_IP -> $PUBLIC_IP"
@@ -45,6 +56,7 @@ if [ -n "$PUBLIC_IP" ] && [ -n "$LOCAL_IP" ] && [ "$PUBLIC_IP" != "$LOCAL_IP" ];
         -H "$PORT" \
         -S "$SECRET" \
         -M "$WORKERS" \
+        "${ADTAG_FLAG[@]}" \
         --nat-info "$LOCAL_IP:$PUBLIC_IP" \
         --aes-pwd proxy-secret proxy-multi.conf
 else
@@ -55,5 +67,6 @@ else
         -H "$PORT" \
         -S "$SECRET" \
         -M "$WORKERS" \
+        "${ADTAG_FLAG[@]}" \
         --aes-pwd proxy-secret proxy-multi.conf
 fi
